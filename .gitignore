@@ -1,0 +1,57 @@
+# Android build artifacts
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Gradle
+.gradle/
+/**/.gradle/
+build/
+*/build/
+
+# Local configuration
+local.properties
+key.properties
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.out/
+out/
+.vscode/
+.kotlin/
+
+# Android Studio/NDK
+.externalNativeBuild/
+.cxx/
+.navigation/
+
+# Captures
+captures/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keystores (do not commit signing keys)
+*.jks
+*.keystore
+
+# Firebase/Google services (if you do not intend to commit these)
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Crashlytics/Fabric properties
+fabric.properties
+
+# Misc
+*.orig
+*.rej
+
