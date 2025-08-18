@@ -9,28 +9,28 @@ import kotlin.math.abs
 
 /**
  * A shake detection utility that uses the device's accelerometer to detect shake gestures.
- * 
+ *
  * This class monitors accelerometer data and triggers callbacks when shake patterns are detected.
  * The shake detection is based on configurable thresholds for force, timing, and shake count.
- * 
+ *
  * @param context The Android context used to access system services
  * @param shakeListener The listener that will receive shake event callbacks
- * 
+ *
  * @see ShakeListener
- * 
+ *
  * Example usage:
  * ```kotlin
- * val shakeDetector = ShakeDetector(this) { 
+ * val shakeDetector = ShakeDetector(this) {
  *     // Handle shake event
  *     Log.d("Shake", "Device was shaken!")
  * }
- * 
+ *
  * // Start listening in onStart()
  * override fun onStart() {
  *     super.onStart()
  *     shakeDetector.start()
  * }
- * 
+ *
  * // Stop listening in onStop()
  * override fun onStop() {
  *     super.onStop()
@@ -38,10 +38,14 @@ import kotlin.math.abs
  * }
  * ```
  */
-class ShakeDetector(private val context: Context, private val shakeListener: ShakeListener) :
+class ShakeDetector(
+    private val context: Context,
+    private val shakeListener: ShakeListener,
+    private var sensitivity: ShakeSensitivity = ShakeSensitivity.Normal
+) :
     SensorEventListener {
     private var mSensorMgr: SensorManager? = null
-    private var sensor: Sensor?=null;
+    private var sensor: Sensor? = null;
 
     private var mLastX = -1.0f
     private var mLastY = -1.0f
@@ -58,7 +62,7 @@ class ShakeDetector(private val context: Context, private val shakeListener: Sha
      */
     fun start() {
         mSensorMgr = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sensor=mSensorMgr?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensor = mSensorMgr?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         if (mSensorMgr == null) {
             throw UnsupportedOperationException("Sensors not supported")
@@ -79,7 +83,7 @@ class ShakeDetector(private val context: Context, private val shakeListener: Sha
      * Should be used in lifecycle hooks depending on your need, for most cases onStop hook is convenient
      */
     fun stop() {
-        if (mSensorMgr != null&&sensor!=null) {
+        if (mSensorMgr != null && sensor != null) {
             mSensorMgr!!.unregisterListener(this, sensor)
             mSensorMgr = null
         }
@@ -87,7 +91,7 @@ class ShakeDetector(private val context: Context, private val shakeListener: Sha
 
 
     companion object {
-        private const val FORCE_THRESHOLD = 350
+        internal const val NORMAL_THRESHOLD = 650
         private const val TIME_THRESHOLD = 100
         private const val SHAKE_TIMEOUT = 500
         private const val SHAKE_DURATION = 1000
@@ -95,10 +99,10 @@ class ShakeDetector(private val context: Context, private val shakeListener: Sha
     }
 
     override fun onSensorChanged(ev: SensorEvent?) {
-        if(ev==null) return;
+        if (ev == null) return;
 
         val now = System.currentTimeMillis()
-        val values=ev.values;
+        val values = ev.values;
         if ((now - mLastForce) > SHAKE_TIMEOUT) {
             mShakeCount = 0
         }
@@ -107,7 +111,7 @@ class ShakeDetector(private val context: Context, private val shakeListener: Sha
             val diff = now - mLastTime
             val speed =
                 (abs((values[0] + values[1] + values[2] - mLastX - mLastY - mLastZ).toDouble()) / diff * 10000).toFloat()
-            if (speed > FORCE_THRESHOLD) {
+            if (speed > getThreshold().toFloat()) {
                 if ((++mShakeCount >= SHAKE_COUNT) && (now - mLastShake > SHAKE_DURATION)) {
                     mLastShake = now
                     mShakeCount = 0
@@ -120,6 +124,17 @@ class ShakeDetector(private val context: Context, private val shakeListener: Sha
             mLastY = values[1]
             mLastZ = values[2]
         }
+    }
+
+    private fun getThreshold(): Number = when (sensitivity) {
+        ShakeSensitivity.High -> NORMAL_THRESHOLD * .6
+        ShakeSensitivity.Normal -> NORMAL_THRESHOLD;
+        ShakeSensitivity.Low -> NORMAL_THRESHOLD * 4
+        else -> ((sensitivity as? ShakeSensitivity.Custom)?.threshold ?: NORMAL_THRESHOLD)
+    }
+
+    fun changeSensitivity(sensitivity: ShakeSensitivity) {
+        this.sensitivity = sensitivity;
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {}
