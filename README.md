@@ -16,9 +16,22 @@ Add the dependency to your app's `build.gradle.kts` file:
 
 ```kotlin
 dependencies {
-    implementation("com.github.AnasEsh:shake_detector:1.0.65")
+    implementation("com.github.AnasEsh:shake_detector:<version>")
 }
 ```
+
+### Option 1: Using JitPack Repository (Recommended)
+
+Add JitPack to your project-level `build.gradle.kts` or `settings.gradle.kts`:
+
+```kotlin
+repositories {
+    maven { url = uri("https://jitpack.io") }
+    // ... other repositories
+}
+```
+
+### Option 2: Using Local Build
 
 Make sure you have `mavenLocal()` in your repositories if using a local build:
 
@@ -78,21 +91,21 @@ val shakeDetector = ShakeDetector(this) {
 // High sensitivity (less force needed)
 val shakeDetector = ShakeDetector(
     context = this,
-    shakeListener = { /* handle shake */ },
+    shakeListener =  /* ... handle shake */ ,
     sensitivity = ShakeSensitivity.High
 )
 
 // Low sensitivity (more force needed)
 val shakeDetector = ShakeDetector(
     context = this,
-    shakeListener = { /* handle shake */ },
+    shakeListener =  /* ... handle shake */ ,
     sensitivity = ShakeSensitivity.Low
 )
 
 // Custom threshold
 val shakeDetector = ShakeDetector(
     context = this,
-    shakeListener = { /* handle shake */ },
+    shakeListener =  /* ... handle shake */ ,
     sensitivity = ShakeSensitivity.Custom(threshold = 800)
 )
 
